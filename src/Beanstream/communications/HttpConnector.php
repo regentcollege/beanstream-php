@@ -113,8 +113,10 @@ class HttpConnector {
             throw new ConnectorException('Unexpected response format', 0);
         }
         
+        $http_code = curl_getinfo($req, CURLINFO_RESPONSE_CODE);
+
 		//check for return errors from the API
-        if (isset($res['code']) && 1 < $res['code'] && !($req['http_code'] >= 200 && $req['http_code'] < 300)) {
+        if (isset($res['code']) && 1 < $res['code'] && !($http_code >= 200 && $http_code < 300)) {
             throw new ApiException($res['message'], $res['code']);
         }
         
