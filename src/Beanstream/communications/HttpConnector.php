@@ -53,7 +53,7 @@ class HttpConnector {
      * @throws ApiException
      * @throws ConnectorException
      */
-    private function request($url, $http_method = NULL, $data = NULL)
+    private function request($http_method = NULL, $url = '', $data = NULL)
     {
     	//check to see if we have curl installed on the server 
         if ( ! extension_loaded('curl')) {
