@@ -10,8 +10,9 @@ class Endpoints {
 	/**
 	 * Endpoints: Set BASE API Endpoint URL with inline {0} platform variable
 	 */
-	CONST BASE_URL_BAMBORANA = 'https://{0}.na.bambora.com';
-	CONST BASE_URL_BEANSTREAM = 'https://{0}.beanstream.com';  //keeping beanstream endpoint for backwards compatibility when $platform = 'www'
+	CONST BASE_URL_SHIFT4 = 'https://api.bam.shift4api.net';
+	CONST BASE_URL_BAMBORANA = self::BASE_URL_SHIFT4;
+	CONST BASE_URL_BEANSTREAM = self::BASE_URL_SHIFT4;
 
 	/**
 	 * Endpoint URL holders
@@ -60,6 +61,31 @@ class Endpoints {
 
 
     /**
+     * Resolve legacy platform names and full endpoint overrides to an API base.
+     * REST URLs no longer use Beanstream's /api prefix.
+     */
+    public static function resolveBaseUrl($platform) {
+        $platform = rtrim(trim((string) $platform), '/');
+        $legacy = array(
+            '', 'api', 'www', 'tls12-api',
+            'api.na.bambora.com', 'tls12-api.na.bambora.com',
+            'https://api.na.bambora.com', 'https://tls12-api.na.bambora.com',
+            'api.beanstream.com/api', 'www.beanstream.com/api',
+            'https://api.beanstream.com/api', 'https://www.beanstream.com/api'
+        );
+        if (in_array(strtolower($platform), $legacy, true)) {
+            return self::BASE_URL_SHIFT4;
+        }
+        if (strpos($platform, '.') === false) {
+            return 'https://' . $platform . '.na.bambora.com';
+        }
+        if (strpos($platform, '://') === false) {
+            return 'https://' . $platform;
+        }
+        return $platform;
+    }
+
+    /**
      * Constructor
      * 
      * @param string $platform API Platform
@@ -68,7 +94,7 @@ class Endpoints {
 	function __construct($platform, $version) {
 			
 		//assign endpoints
-		$baseUrl = ($platform == 'www' ? self::BASE_URL_BEANSTREAM . '/api' : self::BASE_URL_BAMBORANA);
+		$baseUrl = self::resolveBaseUrl($platform);
 		
 		//payments
 		$this->basePaymentsURL = $baseUrl . '/{1}/payments';
@@ -77,7 +103,7 @@ class Endpoints {
 		$this->unreferencedReturnsURL = $this->basePaymentsURL . '/0/returns';
 		$this->voidsURL = $this->basePaymentsURL . '/{2}/void';
 		$this->continuationsURL = $this->basePaymentsURL . '/{2}/continue';
-		$this->tokenizationURL = ($platform == 'www' ? self::BASE_URL_BEANSTREAM . '/scripts/tokenization/tokens' : $baseUrl . '/scripts/tokenization/tokens');
+		$this->tokenizationURL = $baseUrl . '/scripts/tokenization/tokens';
 		
 		//profiles
 		$this->baseProfilesURL = $baseUrl . '/{1}/profiles';
